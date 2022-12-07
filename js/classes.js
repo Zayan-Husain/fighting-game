@@ -60,6 +60,7 @@ class Fighter extends Sprite {
     scale = 1,
     framesMax = 1,
     offset = { x: 0, y: 0 },
+    attackDmg = 0,
     sprites,
     attackBox = { offset: {}, width: undefined, height: undefined }
   }) {
@@ -70,7 +71,7 @@ class Fighter extends Sprite {
       framesMax,
       offset
     })
-
+    this.attackDmg;
     this.velocity = velocity
     this.width = 50
     this.height = 150
@@ -92,6 +93,7 @@ class Fighter extends Sprite {
     this.framesHold = 5
     this.sprites = sprites
     this.dead = false
+    this.team;
 
     for (const sprite in this.sprites) {
       sprites[sprite].image = new Image()
@@ -101,6 +103,7 @@ class Fighter extends Sprite {
 
   update() {
     this.draw()
+    if(this.health <= 0) this.dead = true;
     if (!this.dead) this.animateFrames()
 
     // attack boxes
@@ -126,14 +129,19 @@ class Fighter extends Sprite {
   }
 
   attack() {
-    this.switchSprite('attack1')
+    let rand = Math.random();
+    if(rand > 0.5) { this.switchSprite('attack1')} else {this.switchSprite('attack2')};
     this.isAttacking = true
   }
 
-  takeHit() {
-    this.health -= 20
+  takeHit(dmg) {
+    this.health -= dmg
 
     if (this.health <= 0) {
+      this.health = 0;
+      gsap.to(`#${this.team}Health`, {
+        width: this.health + '%'
+      })
       this.switchSprite('death')
     } else this.switchSprite('takeHit')
   }
@@ -149,6 +157,11 @@ class Fighter extends Sprite {
     if (
       this.image === this.sprites.attack1.image &&
       this.framesCurrent < this.sprites.attack1.framesMax - 1
+    )
+      return
+    if (
+      this.image === this.sprites.attack2.image &&
+      this.framesCurrent < this.sprites.attack2.framesMax - 1
     )
       return
 
@@ -194,6 +207,15 @@ class Fighter extends Sprite {
         if (this.image !== this.sprites.attack1.image) {
           this.image = this.sprites.attack1.image
           this.framesMax = this.sprites.attack1.framesMax
+          this.framesCurrent = 0
+        }
+        break
+
+      case 'attack2':
+        if (this.image !== this.sprites.attack2.image) {
+          console.log("doing attack 2", this.sprites,this.sprites.attack2,this.sprites.attack1);
+          this.image = this.sprites.attack2.image
+          this.framesMax = this.sprites.attack2.framesMax
           this.framesCurrent = 0
         }
         break

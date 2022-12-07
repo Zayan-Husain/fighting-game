@@ -35,3 +35,7 @@ function decreaseTimer() {
     determineWinner({ player, enemy, timerId })
   }
 }
+function resetTimer() {
+  timer = 60;
+  document.querySelector('#timer').innerHTML = timer
+}

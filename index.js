@@ -13,7 +13,7 @@ const background = new Sprite({
     x: 0,
     y: 0
   },
-  imageSrc: './img/dwayne.jpeg'
+  imageSrc: './img/background.png'
 })
 
 const shop = new Sprite({
@@ -42,6 +42,7 @@ const player = new Fighter({
   imageSrc: './img/samuraiMack/Idle.png',
   framesMax: 8,
   scale: 2.5,
+  attackDmg:30,
   offset: {
     x: 215,
     y: 157
@@ -67,6 +68,10 @@ const player = new Fighter({
       imageSrc: './img/samuraiMack/Attack1.png',
       framesMax: 6
     },
+    attack2: {
+      imageSrc: './img/samuraiMack/Attack2.png',
+      framesMax: 6
+    },
     takeHit: {
       imageSrc: './img/samuraiMack/Take Hit - white silhouette.png',
       framesMax: 4
@@ -85,7 +90,8 @@ const player = new Fighter({
     height: 50
   }
 })
-
+player.attackDmg = 20;
+player.team = "player";
 const enemy = new Fighter({
   position: {
     x: 400,
@@ -107,6 +113,7 @@ const enemy = new Fighter({
     x: 215,
     y: 167
   },
+  attackDmg:20,
   sprites: {
     idle: {
       imageSrc: './img/kenji/Idle.png',
@@ -128,6 +135,10 @@ const enemy = new Fighter({
       imageSrc: './img/kenji/Attack1.png',
       framesMax: 4
     },
+    attack2: {
+      imageSrc: './img/kenji/Attack2.png',
+      framesMax: 4
+    },
     takeHit: {
       imageSrc: './img/kenji/Take hit.png',
       framesMax: 3
@@ -146,6 +157,7 @@ const enemy = new Fighter({
     height: 50
   }
 })
+enemy.attackDmg = 18;
 
 console.log(player)
 
@@ -164,8 +176,63 @@ const keys = {
   }
 }
 
-decreaseTimer()
+window.addEventListener('keypress', restart);
 
+decreaseTimer()
+function restart(e) {
+  console.log(e.key);
+  if(e.key === 'r') {
+  player.position = {
+    x: 0,
+    y: 0
+  }
+  player.offset = {
+    x: 215,
+    y: 157
+  }
+  player.velocity = {
+    x: 0,
+    y: 0
+  }
+  player.imageSrc = './img/samuraiMack/Idle.png';
+  player.framesMax = 8;
+  enemy.position = {
+    x: 400,
+    y: 100
+  }
+  enemy.velocity = {
+    x:0,
+    y:0
+  }
+  enemy.offset = {
+    x:215,
+    y:157
+  }
+    player.health = 100;
+    enemy.health = 100;
+    gsap.to('#playerHealth', {
+      width: player.health + '%'
+    })
+    gsap.to('#enemyHealth', {
+      width: enemy.health + '%'
+    })
+    player.dead = false;
+    enemy.dead = false;
+    player.animateFrames()
+    enemy.animateFrames()
+    player.image = player.sprites.idle.image
+    player.framesMax = player.sprites.idle.framesMax
+    player.framesCurrent = 0
+    enemy.image = enemy.sprites.idle.image
+    enemy.framesMax = enemy.sprites.idle.framesMax
+    enemy.framesCurrent = 0
+    player.switchSprite('idle')
+    enemy.switchSprite('idle')
+    resetTimer();
+    decreaseTimer();
+  }
+}
+enemy.team = "enemy";
 function animate() {
   window.requestAnimationFrame(animate)
   c.fillStyle = 'black'
@@ -226,7 +293,7 @@ function animate() {
     player.isAttacking &&
     player.framesCurrent === 4
   ) {
-    enemy.takeHit()
+    enemy.takeHit(player.attackDmg)
     player.isAttacking = false
 
     gsap.to('#enemyHealth', {
@@ -248,7 +315,8 @@ function animate() {
     enemy.isAttacking &&
     enemy.framesCurrent === 2
   ) {
-    player.takeHit()
+    player.takeHit(enemy.attackDmg)
+    console.log(enemy.attackDmg)
     enemy.isAttacking = false
 
     gsap.to('#playerHealth', {
